@@ -42,7 +42,7 @@
 #define bit_enc_b                       (1<<pin_enc_b)
 
 typedef enum {off,on} switcher_t;
-typedef enum {main_screen,T_setting,HIST_setting} mode_t;
+typedef enum {main_screen,T_setting,HIST_setting,first_adj} mode_t;
 
 typedef struct {
 	char cnt;
@@ -68,6 +68,7 @@ typedef struct {
         char histeresis_off_mode;
         char histeresis_on_mode;
         char on_off_mode;
+        char Tcorrection;
 }
 eeprom_data_t;
 
@@ -75,6 +76,7 @@ typedef struct {
 	char t_left;
         char t_right;
 	char h;
+        char hh;
         char value_left;
         char value_right;
 }
@@ -93,6 +95,7 @@ void init_tim2 (void);
 void init_encoder(encoder_t* enc);
 void encoder_handler(encoder_t* enc);
 void encoder_setter(int lim_l,int lim_h,int first_value);
+char check_encoder_button(encoder_t* enc);
 
 //iic
 void sys_del_us(char del_us);
@@ -101,7 +104,7 @@ char send_byte (char data_byte);
 unsigned char receive_byte (char acknowledge);
 void stop_iic (void);
 
-
+void first_adjustment(encoder_t* enc);
 void print_changeg_value_left(char* buf,char value, char x, char y);
 void print_changeg_value_right(char* buf,char value, char x, char y );
 void write_eeprom(char* addr_eeprom,char data);
