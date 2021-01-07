@@ -27,10 +27,13 @@ int main( void )
    //send_cyr_to_eeprom();
   init1604();
   init_in_out();
-  init_BME280();
-  init_encoder(&encoder);
   
-
+  init_encoder(&encoder);
+  _bme280_calib.correction=eeprom_data.Tcorrection;
+  if (check_encoder_button(&encoder)) 
+  {mode=first_adj;first_adjustment(&encoder);}
+  init_BME280();
+  
   while(1){
    // measurement
    t=readTemperature();
@@ -83,16 +86,41 @@ int main( void )
        print_symb(&s_cyr_eeprom[0].Ge,1,1,0);
        print_symb(&s_cyr_eeprom[0].II,2,1,1);
        print_string("CTEP.",3,1);
-       db.h=0;
+       db.h=10;db.hh=10;
 
      }
      print_changeg_value_right(&db.h,encoder.enc_data/10, 3, 2 );
      print_char(0x2e,4,2);
-     print_changeg_value_right(&db.h,encoder.enc_data%10, 5, 2 );
+     print_changeg_value_right(&db.hh,encoder.enc_data%10, 5, 2 );
    }
 
   }
   return 0;
+}
+void first_adjustment(encoder_t* enc){
+   extern eeprom_data_t eeprom_data;
+   extern data_buffer_t db;
+   extern encoder_t 	encoder;
+   clear();
+   print_string("PE",1,1);    
+   print_symb(&s_cyr_eeprom[0].Ge,3,1,0);
+   print_symb(&s_cyr_eeprom[0].Uu,4,1,1);
+   print_symb(&s_cyr_eeprom[0].Le,5,1,2);
+   print_string(".",6,1);   
+   print_string("dT =-",1,2);    
+   print_char(0x2e,7,2);
+   db.h=10;db.hh=10;
+   encoder_setter(0,50,eeprom_data.Tcorrection);
+ 
+  while(!enc->but_data_long){
+     
+     print_changeg_value_right(&db.h,encoder.enc_data/10, 6, 2 );
+     
+     print_changeg_value_right(&db.hh,encoder.enc_data%10, 8, 2 ); 
+      if(encoder.enc_data!=eeprom_data.Tcorrection) write_eeprom(&eeprom_data.Tcorrection,encoder.enc_data); 
+}
+clear();
+encoder.but_data_long=0;
 }
 
 void print_changeg_value_left(char* buf,char value, char x, char y ){
