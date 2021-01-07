@@ -33,6 +33,13 @@ void init_encoder(encoder_t* enc){
         enc->but_data_lim_long=1;
 }
 
+char check_encoder_button(encoder_t* enc){
+      
+        if(PORT_ENCODER_IDR&bit_enc_b) return 0;
+        else return 1;
+
+}
+
 void encoder_handler(encoder_t* enc){ 
   char cnt_lim=7;
 	int cnt_button_lim=10000;
